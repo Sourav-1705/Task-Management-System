@@ -1,3 +1,4 @@
+import { usersList } from "./config";
 import { uploadToStore } from "./upload";
 
 // Function to get form data
@@ -59,11 +60,7 @@ export const createTaskManager = () => {
 
 	const assignOptions = [
 		{ value: "", text: "Assign to..." },
-		{ value: "Atanu Das", text: "Atanu Das" },
-		{ value: "Pallabi Banka", text: "Pallabi Banka" },
-		{ value: "Jeet Chakraborty", text: "Jeet Chakraborty" },
-		{ value: "Priyanka Sarkar", text: "Priyanka Sarkar" },
-		{ value: "Sindhukona Tewari", text: "Sindhukona Tewari" },
+		...usersList,
 	];
 
 	assignOptions.forEach((option) => {
@@ -147,7 +144,6 @@ export const addTaskToList = (taskData: {
 	const { title, details, assignedTo, priority } = taskData;
 	createTaskElement(title, details, assignedTo, priority);
 }
-// Function to create and add task elements to the list
 const createTaskElement = (
 	title: string,
 	details: string,
@@ -156,7 +152,6 @@ const createTaskElement = (
 ) => {
 	const taskElement = document.createElement("div");
 	taskElement.className = `task-item priority-${priority.toLowerCase()}`;
-	// Add styles to ensure one item per row
 	taskElement.style.display = "block";
 	taskElement.style.width = "100%";
 	taskElement.style.marginBottom = "10px";
@@ -171,12 +166,17 @@ const createTaskElement = (
 
 	const taskAssigned = document.createElement("p");
 	taskAssigned.className = "task-meta";
-
 	const assignedToSpan = document.createElement("span");
 	assignedToSpan.className = "assigned-to";
 	assignedToSpan.textContent = `Assigned to: ${assignedTo}`;
 	taskAssigned.appendChild(assignedToSpan);
 	taskElement.appendChild(taskAssigned);
+
+	const assignedDate = new Date().toLocaleString();
+	const assignedDateP = document.createElement("p");
+	assignedDateP.className = "task-meta";
+	assignedDateP.textContent = `Assigned Date: ${assignedDate}`;
+	taskElement.appendChild(assignedDateP);
 
 	const taskPriority = document.createElement("p");
 	taskPriority.className = "task-meta";
@@ -186,8 +186,78 @@ const createTaskElement = (
 	taskPriority.appendChild(prioritySpan);
 	taskElement.appendChild(taskPriority);
 
-	// Delete button has been removed
+	// Status Dropdown
+	const statusWrapper = document.createElement("p");
+	statusWrapper.className = "task-meta";
+	const statusLabel = document.createElement("label");
+	statusLabel.textContent = "Status: ";
+	const statusSelect = document.createElement("select");
+	const statuses = ["Pending", "Work In Progress", "Completed"];
+	statuses.forEach(status => {
+		const option = document.createElement("option");
+		option.value = status;
+		option.text = status;
+		statusSelect.appendChild(option);
+	});
+	statusWrapper.appendChild(statusLabel);
+	statusWrapper.appendChild(statusSelect);
+	taskElement.appendChild(statusWrapper);
+
+	// Completed Time
+	const completedTimeP = document.createElement("p");
+	completedTimeP.className = "task-meta";
+	completedTimeP.style.display = "none";
+	taskElement.appendChild(completedTimeP);
+
+	// Comment By Dropdown
+	const commentByWrapper = document.createElement("p");
+	commentByWrapper.className = "task-meta";
+	const commentByLabel = document.createElement("label");
+	commentByLabel.textContent = "Comment By: ";
+	const commentBySelect = document.createElement("select");
+	const users = [
+		{ value: "", text: "Commented by..." },
+		...usersList,
+	]
+	users.forEach(user => {
+		const option = document.createElement("option");
+		option.value = user.value;
+		option.text = user.text;
+		commentBySelect.appendChild(option);
+	});
+	commentByWrapper.appendChild(commentByLabel);
+	commentByWrapper.appendChild(commentBySelect);
+	taskElement.appendChild(commentByWrapper);
+
+	// Comment Textarea
+	const commentLabel = document.createElement("label");
+	commentLabel.textContent = "Comment:";
+	commentLabel.htmlFor = `comment-${title}`;
+
+	const commentTextarea = document.createElement("textarea");
+	commentTextarea.id = `comment-${title}`;
+	commentTextarea.rows = 3;
+	commentTextarea.style.width = "-webkit-fill-available";
+	commentTextarea.placeholder = "Write your comment here...";
+
+	taskElement.appendChild(commentLabel);
+	taskElement.appendChild(commentTextarea);
+
+	// Handle status change
+	statusSelect.addEventListener("change", () => {
+		if (statusSelect.value === "Completed") {
+			const completedTime = new Date().toLocaleString();
+			completedTimeP.textContent = `Completed Time: ${completedTime}`;
+			completedTimeP.style.display = "block";
+			statusSelect.disabled = true;
+			commentTextarea.disabled = true;
+			commentBySelect.disabled = true;
+		}
+	});
 
 	// Add to task list
 	document.getElementById("tasks")!.appendChild(taskElement);
-}
+};
+
+
+
