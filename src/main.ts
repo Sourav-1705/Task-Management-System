@@ -1,4 +1,4 @@
 import './style.css';
+import { createTaskManager } from './task';
 
-const app = document.querySelector<HTMLDivElement>('#app')!;
-app.innerHTML = "Hello Srv";
+createTaskManager();
