@@ -1,3 +1,14 @@
+import { uploadToStore } from "./upload";
+
+// Function to get form data
+const getFormData = () => {
+	const title = (document.getElementById("taskTitle") as HTMLInputElement).value;
+	const details = (document.getElementById("taskDetails") as HTMLTextAreaElement).value;
+	const assignedTo = (document.getElementById("assignedTo") as HTMLSelectElement).value;
+	const priority = (document.getElementById("priority") as HTMLSelectElement).value;
+
+	return { title, details, assignedTo, priority };
+}
 export const createTaskManager = () => {
 	const app = document.querySelector<HTMLDivElement>("#app")!;
 
@@ -116,69 +127,67 @@ export const createTaskManager = () => {
 	form.addEventListener("submit", (e) => {
 		e.preventDefault();
 
-		// Get form values
-		const title = (document.getElementById("taskTitle") as HTMLInputElement)
-			.value;
-		const details = (
-			document.getElementById("taskDetails") as HTMLTextAreaElement
-		).value;
-		const assignedTo = (
-			document.getElementById("assignedTo") as HTMLSelectElement
-		).value;
-		const priority = (document.getElementById("priority") as HTMLSelectElement)
-			.value;
+		// Get form data
+		const taskData = getFormData();
 
-		// Create task element
-		createTaskElement(title, details, assignedTo, priority);
-
+		// Add task to the list
+		addTaskToList(taskData);
+		uploadToStore(taskData.title, taskData.details, taskData.assignedTo, taskData.priority);
 		// Reset form
 		form.reset();
 	});
+}
+// Function to add a task to the assigned tasks list
+export const addTaskToList = (taskData: {
+	title: string,
+	details: string,
+	assignedTo: string,
+	priority: string
+}) => {
+	const { title, details, assignedTo, priority } = taskData;
+	createTaskElement(title, details, assignedTo, priority);
+}
+// Function to create and add task elements to the list
+const createTaskElement = (
+	title: string,
+	details: string,
+	assignedTo: string,
+	priority: string,
+) => {
+	const taskElement = document.createElement("div");
+	taskElement.className = `task-item priority-${priority.toLowerCase()}`;
+	// Add styles to ensure one item per row
+	taskElement.style.display = "block";
+	taskElement.style.width = "100%";
+	taskElement.style.marginBottom = "10px";
 
-	// Function to create and add task elements to the list
-	function createTaskElement(
-		title: string,
-		details: string,
-		assignedTo: string,
-		priority: string
-	) {
-		const taskElement = document.createElement("div");
-		taskElement.className = `task-item priority-${priority.toLowerCase()}`;
+	const taskTitle = document.createElement("h3");
+	taskTitle.textContent = `Task: ${title}`;
+	taskElement.appendChild(taskTitle);
 
-		const taskTitle = document.createElement("h3");
-		taskTitle.textContent = title;
-		taskElement.appendChild(taskTitle);
+	const taskDetails = document.createElement("p");
+	taskDetails.textContent = `Details: ${details}`;
+	taskElement.appendChild(taskDetails);
 
-		const taskDetails = document.createElement("p");
-		taskDetails.textContent = details;
-		taskElement.appendChild(taskDetails);
+	const taskAssigned = document.createElement("p");
+	taskAssigned.className = "task-meta";
 
-		const taskMeta = document.createElement("div");
-		taskMeta.className = "task-meta";
+	const assignedToSpan = document.createElement("span");
+	assignedToSpan.className = "assigned-to";
+	assignedToSpan.textContent = `Assigned to: ${assignedTo}`;
+	taskAssigned.appendChild(assignedToSpan);
+	taskElement.appendChild(taskAssigned);
 
-		const assignedToSpan = document.createElement("span");
-		assignedToSpan.className = "assigned-to";
-		assignedToSpan.textContent = `Assigned to: ${assignedTo}`;
-		taskMeta.appendChild(assignedToSpan);
+	const taskPriority = document.createElement("p");
+	taskPriority.className = "task-meta";
+	const prioritySpan = document.createElement("span");
+	prioritySpan.className = "priority";
+	prioritySpan.textContent = `Priority: ${priority}`;
+	taskPriority.appendChild(prioritySpan);
+	taskElement.appendChild(taskPriority);
 
-		const prioritySpan = document.createElement("span");
-		prioritySpan.className = "priority";
-		prioritySpan.textContent = `Priority: ${priority}`;
-		taskMeta.appendChild(prioritySpan);
+	// Delete button has been removed
 
-		taskElement.appendChild(taskMeta);
-
-		// Add delete button
-		const deleteButton = document.createElement("button");
-		deleteButton.className = "delete-task";
-		deleteButton.textContent = "Delete";
-		deleteButton.addEventListener("click", () => {
-			taskElement.remove();
-		});
-
-		taskElement.appendChild(deleteButton);
-
-		// Add to task list
-		document.getElementById("tasks")!.appendChild(taskElement);
-	}
+	// Add to task list
+	document.getElementById("tasks")!.appendChild(taskElement);
 }

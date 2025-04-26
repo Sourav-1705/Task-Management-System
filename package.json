@@ -16,5 +16,8 @@
     "@types/node": "^22.15.2",
     "typescript": "^5.8.3",
     "vite": "^6.3.3"
+  },
+  "dependencies": {
+    "firebase": "^11.6.1"
   }
 }
